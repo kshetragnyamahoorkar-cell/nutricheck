@@ -8,22 +8,34 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
+        
         * { transition: all 0.2s ease; }
-        .food-card:hover { transform: translateY(-2px); box-shadow: 0 15px 20px -5px rgb(16 185 129 / 0.1); }
-        .tab-active { border-bottom: 3px solid #10b981; color: #10b981; font-weight: 600; }
+        
+        .food-card:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 15px 20px -5px rgb(16 185 129 / 0.1); 
+        }
+        
+        .tab-active { 
+            border-bottom: 3px solid #10b981; 
+            color: #10b981; 
+            font-weight: 600; 
+        }
+        
         .modal { animation: modalPop 0.3s ease-out; }
         @keyframes modalPop { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
         .foods-grid { display: grid; gap: 14px; }
+        
         @media (max-width: 480px) {
             .foods-grid { grid-template-columns: 1fr; gap: 16px; }
             .food-card { padding: 14px 12px; }
         }
         @media (min-width: 481px) and (max-width: 768px) {
-            .foods-grid { grid-template-columns: repeat(2, 1fr); }
+            .foods-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
         }
         @media (min-width: 769px) {
-            .foods-grid { grid-template-columns: repeat(4, 1fr); }
+            .foods-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; }
         }
     </style>
 </head>
@@ -36,11 +48,9 @@
                 <div class="flex items-center gap-x-3">
                     <div class="w-8 h-8 bg-emerald-500 rounded-2xl flex items-center justify-center text-white text-xl">🍛</div>
                     <h1 class="text-xl font-semibold tracking-tight" style="font-family: 'Space Grotesk', sans-serif;">NutriCheck</h1>
-                    <span class="text-xs bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded">200k+</span>
                 </div>
-                <div class="hidden md:flex items-center gap-x-6 text-sm">
+                <div class="hidden md:flex items-center gap-x-6 text-sm font-medium">
                     <a onclick="navigateTo('foods')" id="nav-foods" class="tab-active cursor-pointer">Foods</a>
-                    <!-- Other nav links can be added later -->
                 </div>
             </div>
         </div>
@@ -48,31 +58,29 @@
 
     <div class="max-w-7xl mx-auto px-4 py-5">
 
+        <!-- FOODS PAGE -->
         <div id="page-foods">
             <div class="mb-5">
                 <h2 class="text-3xl font-semibold">Foods Database</h2>
-                <p class="text-emerald-400 text-sm">200,000+ items • Real + Generated variations</p>
+                <p class="text-emerald-400 text-sm">All your requested Indian dishes included</p>
             </div>
 
             <div class="relative mb-6">
-                <input id="food-search" placeholder="Search any food (e.g. Hyderabadi Biryani, Gulab Jamun...)" 
-                       class="w-full bg-slate-900 border border-slate-700 focus:border-emerald-500 rounded-3xl pl-12 py-3.5 outline-none"
+                <input id="food-search" placeholder="Search biryani, gulab jamun, paneer butter masala..." 
+                       class="w-full bg-slate-900 border border-slate-700 focus:border-emerald-500 rounded-3xl pl-12 py-3.5 outline-none text-base"
                        onkeyup="if(event.key==='Enter') filterFoods()">
                 <i class="fa-solid fa-magnifying-glass absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"></i>
             </div>
 
             <div class="flex flex-wrap gap-2 mb-6 text-sm">
-                <button onclick="filterCategory('all')" id="cat-all" class="px-5 py-2 bg-emerald-500 text-white rounded-3xl">All</button>
-                <button onclick="filterCategory('indian')" id="cat-indian" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 rounded-3xl">Indian</button>
-                <button onclick="filterCategory('fastfood')" id="cat-fastfood" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 rounded-3xl">Fast Food</button>
-                <button onclick="filterCategory('sweets')" id="cat-sweets" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 rounded-3xl">Sweets</button>
+                <button onclick="filterCategory('all')" id="cat-all" class="px-5 py-2 bg-emerald-500 text-white rounded-3xl font-medium">All</button>
+                <button onclick="filterCategory('indian')" id="cat-indian" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 rounded-3xl font-medium">🇮🇳 Indian</button>
+                <button onclick="filterCategory('fastfood')" id="cat-fastfood" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 rounded-3xl font-medium">🍔 Fast Food</button>
+                <button onclick="filterCategory('sweets')" id="cat-sweets" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 rounded-3xl font-medium">🍬 Sweets</button>
+                <button onclick="filterCategory('drinks')" id="cat-drinks" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 rounded-3xl font-medium">🥤 Drinks</button>
             </div>
 
             <div id="foods-grid" class="foods-grid"></div>
-            <div id="load-more" class="text-center mt-8">
-                <button onclick="loadMoreFoods()" 
-                        class="px-8 py-3 bg-slate-800 hover:bg-slate-700 rounded-3xl text-sm">Load More Foods</button>
-            </div>
         </div>
     </div>
 
@@ -80,109 +88,147 @@
     <div id="add-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-4">
         <div onclick="event.stopImmediatePropagation()" class="modal bg-slate-900 w-full max-w-sm rounded-3xl p-6">
             <h3 class="text-lg font-semibold mb-5" id="modal-food-name"></h3>
+            
             <div class="mb-6">
                 <label class="text-xs text-slate-400 block mb-2">SERVINGS</label>
                 <div class="flex items-center justify-center gap-4">
-                    <button onclick="changeQuantity(-0.5)" class="w-9 h-9 bg-slate-800 rounded-2xl text-2xl">-</button>
-                    <input id="modal-quantity" type="number" step="0.25" value="1" class="text-center text-4xl font-semibold bg-transparent w-20 outline-none">
-                    <button onclick="changeQuantity(0.5)" class="w-9 h-9 bg-slate-800 rounded-2xl text-2xl">+</button>
+                    <button onclick="changeQuantity(-0.5)" class="w-9 h-9 bg-slate-800 rounded-2xl text-2xl flex items-center justify-center">-</button>
+                    <input id="modal-quantity" type="number" step="0.25" value="1" 
+                           class="text-center text-4xl font-semibold bg-transparent w-20 outline-none">
+                    <button onclick="changeQuantity(0.5)" class="w-9 h-9 bg-slate-800 rounded-2xl text-2xl flex items-center justify-center">+</button>
                 </div>
             </div>
+
             <div id="modal-nutrition" class="grid grid-cols-2 gap-3"></div>
+
             <div class="flex gap-3 mt-8">
-                <button onclick="hideAddModal()" class="flex-1 h-12 border border-slate-600 rounded-3xl">Cancel</button>
-                <button onclick="confirmAddToLog()" class="flex-1 h-12 bg-emerald-500 rounded-3xl text-white">Add to Log</button>
+                <button onclick="hideAddModal()" class="flex-1 h-12 border border-slate-600 rounded-3xl text-sm font-medium">Cancel</button>
+                <button onclick="confirmAddToLog()" class="flex-1 h-12 bg-emerald-500 rounded-3xl text-sm font-medium text-white">Add to Log</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Base real foods
-        let baseFoods = [
-            { id: 100, name: "Big Mac", category: "fastfood", serving: "1 burger", calories: 540, protein: 25, carbs: 45, fat: 29 },
-            { id: 101, name: "McAloo Tikki Burger", category: "fastfood", serving: "1 burger", calories: 340, protein: 8, carbs: 48, fat: 14 },
-            { id: 105, name: "Hyderabadi Chicken Biryani", category: "indian", serving: "1 plate", calories: 580, protein: 28, carbs: 65, fat: 22 },
-            { id: 106, name: "Paneer Butter Masala", category: "indian", serving: "1 bowl", calories: 480, protein: 18, carbs: 22, fat: 35 },
-            { id: 109, name: "Masala Dosa", category: "indian", serving: "1 piece", calories: 280, protein: 7, carbs: 48, fat: 8 },
-            { id: 111, name: "Gulab Jamun", category: "sweets", serving: "2 pieces", calories: 320, protein: 6, carbs: 48, fat: 12 },
-            { id: 113, name: "Masala Chai", category: "drinks", serving: "1 cup", calories: 80, protein: 2, carbs: 10, fat: 4 }
+        // ==================== FULL FOOD DATABASE (All your requested items) ====================
+        let FOODS_DB = [
+            // Biryanis & Pulaos
+            { id: 1, name: "Hyderabadi Chicken Biryani", category: "indian", serving: "1 plate", calories: 580, protein: 28, carbs: 65, fat: 22 },
+            { id: 2, name: "Hyderabadi Veg Biryani", category: "indian", serving: "1 plate", calories: 420, protein: 12, carbs: 68, fat: 14 },
+            { id: 3, name: "Lucknowi Veg Biryani", category: "indian", serving: "1 plate", calories: 410, protein: 11, carbs: 67, fat: 13 },
+            { id: 4, name: "Kolkata Mutton Biryani", category: "indian", serving: "1 plate", calories: 610, protein: 32, carbs: 62, fat: 28 },
+            { id: 5, name: "Malabar Chicken Biryani", category: "indian", serving: "1 plate", calories: 520, protein: 25, carbs: 60, fat: 24 },
+            { id: 6, name: "Ambur Biryani", category: "indian", serving: "1 plate", calories: 550, protein: 26, carbs: 58, fat: 20 },
+            { id: 7, name: "Thalassery Biryani", category: "indian", serving: "1 plate", calories: 510, protein: 24, carbs: 62, fat: 22 },
+            { id: 8, name: "Dindigul Biryani", category: "indian", serving: "1 plate", calories: 530, protein: 25, carbs: 60, fat: 23 },
+            { id: 9, name: "Veg Pulao", category: "indian", serving: "1 bowl", calories: 320, protein: 8, carbs: 55, fat: 10 },
+            { id: 10, name: "Peas Pulao", category: "indian", serving: "1 bowl", calories: 340, protein: 9, carbs: 58, fat: 11 },
+            { id: 11, name: "Kashmiri Pulao", category: "indian", serving: "1 bowl", calories: 380, protein: 7, carbs: 60, fat: 14 },
+
+            // Rice Dishes
+            { id: 12, name: "Curd Rice", category: "indian", serving: "1 bowl", calories: 220, protein: 6, carbs: 38, fat: 5 },
+            { id: 13, name: "Lemon Rice", category: "indian", serving: "1 bowl", calories: 280, protein: 5, carbs: 48, fat: 8 },
+            { id: 14, name: "Tamarind Rice (Puliyodarai)", category: "indian", serving: "1 bowl", calories: 290, protein: 5, carbs: 50, fat: 9 },
+            { id: 15, name: "Coconut Rice", category: "indian", serving: "1 bowl", calories: 310, protein: 6, carbs: 52, fat: 12 },
+            { id: 16, name: "Jeera Rice", category: "indian", serving: "1 bowl", calories: 260, protein: 5, carbs: 48, fat: 7 },
+            { id: 17, name: "Ghee Rice", category: "indian", serving: "1 bowl", calories: 340, protein: 6, carbs: 50, fat: 15 },
+            { id: 18, name: "Bisibele Bath", category: "indian", serving: "1 bowl", calories: 380, protein: 10, carbs: 60, fat: 12 },
+            { id: 19, name: "Ven Pongal", category: "indian", serving: "1 bowl", calories: 300, protein: 8, carbs: 45, fat: 10 },
+
+            // Breads
+            { id: 20, name: "Roti / Chapati", category: "indian", serving: "1 piece", calories: 120, protein: 4, carbs: 22, fat: 3 },
+            { id: 21, name: "Butter Naan", category: "indian", serving: "1 piece", calories: 280, protein: 8, carbs: 38, fat: 12 },
+            { id: 22, name: "Garlic Naan", category: "indian", serving: "1 piece", calories: 310, protein: 9, carbs: 40, fat: 14 },
+            { id: 23, name: "Aloo Paratha", category: "indian", serving: "1 piece", calories: 320, protein: 8, carbs: 45, fat: 12 },
+            { id: 24, name: "Paneer Paratha", category: "indian", serving: "1 piece", calories: 380, protein: 12, carbs: 42, fat: 18 },
+            { id: 25, name: "Lachha Paratha", category: "indian", serving: "1 piece", calories: 340, protein: 7, carbs: 40, fat: 18 },
+
+            // Curries & Main Dishes
+            { id: 26, name: "Butter Chicken", category: "indian", serving: "1 bowl", calories: 520, protein: 28, carbs: 25, fat: 32 },
+            { id: 27, name: "Paneer Butter Masala", category: "indian", serving: "1 bowl", calories: 480, protein: 18, carbs: 22, fat: 35 },
+            { id: 28, name: "Dal Makhani", category: "indian", serving: "1 bowl", calories: 320, protein: 12, carbs: 28, fat: 20 },
+            { id: 29, name: "Chole Masala", category: "indian", serving: "1 bowl", calories: 280, protein: 14, carbs: 38, fat: 10 },
+            { id: 30, name: "Rajma Masala", category: "indian", serving: "1 bowl", calories: 340, protein: 15, carbs: 45, fat: 12 },
+
+            // Street Foods
+            { id: 31, name: "Vada Pav", category: "fastfood", serving: "1 piece", calories: 290, protein: 6, carbs: 35, fat: 14 },
+            { id: 32, name: "Pav Bhaji", category: "fastfood", serving: "1 plate", calories: 450, protein: 10, carbs: 55, fat: 18 },
+            { id: 33, name: "Samosa (2 pcs)", category: "fastfood", serving: "2 pieces", calories: 260, protein: 5, carbs: 30, fat: 14 },
+            { id: 34, name: "Bhel Puri", category: "fastfood", serving: "1 plate", calories: 280, protein: 6, carbs: 45, fat: 10 },
+            { id: 35, name: "Pani Puri", category: "fastfood", serving: "6 pieces", calories: 180, protein: 4, carbs: 35, fat: 2 },
+
+            // Sweets
+            { id: 36, name: "Gulab Jamun (2 pcs)", category: "sweets", serving: "2 pieces", calories: 320, protein: 6, carbs: 48, fat: 12 },
+            { id: 37, name: "Rasgulla (2 pcs)", category: "sweets", serving: "2 pieces", calories: 180, protein: 4, carbs: 38, fat: 1 },
+            { id: 38, name: "Jalebi (4 pieces)", category: "sweets", serving: "4 pieces", calories: 380, protein: 5, carbs: 65, fat: 12 },
+            { id: 39, name: "Rasmalai (2 pcs)", category: "sweets", serving: "2 pieces", calories: 280, protein: 8, carbs: 42, fat: 10 },
+            { id: 40, name: "Motichoor Ladoo (2 pcs)", category: "sweets", serving: "2 pieces", calories: 240, protein: 5, carbs: 35, fat: 10 },
+
+            // Drinks
+            { id: 41, name: "Masala Chai", category: "drinks", serving: "1 cup", calories: 80, protein: 2, carbs: 10, fat: 4 },
+            { id: 42, name: "Sweet Lassi", category: "drinks", serving: "1 glass", calories: 220, protein: 8, carbs: 28, fat: 8 },
+            { id: 43, name: "Filter Coffee", category: "drinks", serving: "1 cup", calories: 90, protein: 3, carbs: 12, fat: 3 },
+            { id: 44, name: "Buttermilk (Chaas)", category: "drinks", serving: "1 glass", calories: 60, protein: 4, carbs: 6, fat: 2 },
+            { id: 45, name: "Badam Milk", category: "drinks", serving: "1 glass", calories: 180, protein: 7, carbs: 22, fat: 8 },
+
+            // More from your list (South Indian, Street, etc.)
+            { id: 46, name: "Medu Vada (2 pcs)", category: "indian", serving: "2 pieces", calories: 240, protein: 8, carbs: 22, fat: 14 },
+            { id: 47, name: "Uttapam", category: "indian", serving: "1 piece", calories: 260, protein: 6, carbs: 42, fat: 9 },
+            { id: 48, name: "Idli (2 pcs)", category: "indian", serving: "2 pieces", calories: 120, protein: 4, carbs: 24, fat: 1 },
+            { id: 49, name: "Upma", category: "indian", serving: "1 bowl", calories: 240, protein: 6, carbs: 38, fat: 8 },
+            { id: 50, name: "Paneer Tikka", category: "indian", serving: "6 pieces", calories: 360, protein: 22, carbs: 15, fat: 24 }
         ];
 
-        let generatedFoods = [];
-        let customFoods = [];
         let currentAddFood = null;
         let currentQuantity = 1;
         let currentCategoryFilter = 'all';
-        let currentPage = 0;
-        const PAGE_SIZE = 50; // Show 50 at a time for performance
 
-        // Templates for generating thousands of variations
-        const prefixes = ["Spicy", "Mild", "Cheesy", "Low-Cal", "Extra", "Mini", "Deluxe", "Classic", "Healthy", "Street Style"];
-        const suffixes = ["with Curd", "with Pickle", "Family Size", "Jain Style", "Andhra Style", "Punjabi Style", "South Indian", "North Indian"];
-
-        function generateMoreFoods(count = 5000) {
-            const categories = ["indian", "fastfood", "sweets", "drinks"];
-            const bases = ["Biryani", "Dosa", "Paratha", "Paneer", "Chicken", "Dal", "Rice", "Naan", "Ladoo", "Halwa", "Chai", "Lassi"];
-
-            for (let i = 0; i < count; i++) {
-                const base = bases[Math.floor(Math.random() * bases.length)];
-                const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-                const suffix = Math.random() > 0.6 ? " " + suffixes[Math.floor(Math.random() * suffixes.length)] : "";
-
-                const name = `${prefix} ${base}${suffix}`.trim();
-
-                generatedFoods.push({
-                    id: 1000 + generatedFoods.length,
-                    name: name,
-                    category: categories[Math.floor(Math.random() * categories.length)],
-                    serving: ["1 plate", "1 bowl", "1 piece", "1 cup", "2 pcs"][Math.floor(Math.random()*5)],
-                    calories: Math.floor(80 + Math.random() * 520),
-                    protein: Math.floor(2 + Math.random() * 35),
-                    carbs: Math.floor(10 + Math.random() * 70),
-                    fat: Math.floor(1 + Math.random() * 30)
-                });
-            }
+        function loadData() {
+            return FOODS_DB;
         }
 
-        function getAllFoods() {
-            return [...baseFoods, ...generatedFoods, ...customFoods];
+        function filterCategory(cat) {
+            currentCategoryFilter = cat;
+            document.querySelectorAll('#page-foods button').forEach(b => {
+                b.classList.toggle('bg-emerald-500', b.id === `cat-${cat}`);
+                b.classList.toggle('text-white', b.id === `cat-${cat}`);
+            });
+            filterFoods();
         }
 
         function filterFoods() {
-            const all = getAllFoods();
+            const foods = loadData();
             const query = document.getElementById('food-search').value.toLowerCase().trim();
 
-            let filtered = all;
+            let filtered = foods;
             if (currentCategoryFilter !== 'all') {
                 filtered = filtered.filter(f => f.category === currentCategoryFilter);
             }
             if (query) {
                 filtered = filtered.filter(f => f.name.toLowerCase().includes(query));
             }
-
-            currentPage = 0;
-            renderFoodsPage(filtered);
+            renderFoods(filtered);
         }
 
-        function renderFoodsPage(filtered) {
+        function renderFoods(foods) {
             const container = document.getElementById('foods-grid');
             container.innerHTML = '';
 
-            const start = currentPage * PAGE_SIZE;
-            const end = Math.min(start + PAGE_SIZE, filtered.length);
-            const slice = filtered.slice(start, end);
+            if (foods.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400">No foods found</div>`;
+                return;
+            }
 
-            slice.forEach(food => {
-                const div = document.createElement('div');
-                div.className = `food-card bg-slate-900 rounded-3xl border border-slate-800 p-4`;
-                div.innerHTML = `
+            foods.forEach(food => {
+                const card = document.createElement('div');
+                card.className = `food-card bg-slate-900 rounded-3xl border border-slate-800 p-4`;
+                card.innerHTML = `
                     <div class="flex justify-between items-start">
-                        <div class="flex-1 pr-2">
+                        <div class="flex-1 pr-3">
                             <div class="font-medium text-[15px] leading-tight">${food.name}</div>
                             <div class="text-xs text-slate-400 mt-1">${food.serving}</div>
                         </div>
                         <button onclick="event.stopImmediatePropagation(); addFoodToLogPrompt(${food.id});" 
-                                class="add-btn w-8 h-8 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center text-xl">＋</button>
+                                class="w-8 h-8 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center text-xl">＋</button>
                     </div>
                     <div class="grid grid-cols-4 gap-2 mt-5 text-center text-xs">
                         <div><span class="text-emerald-400 font-semibold">${food.calories}</span><br><span class="text-slate-500">kcal</span></div>
@@ -191,26 +237,13 @@
                         <div><span class="text-emerald-400 font-semibold">${food.fat}</span><br><span class="text-slate-500">F</span></div>
                     </div>
                 `;
-                container.appendChild(div);
+                container.appendChild(card);
             });
-
-            document.getElementById('load-more').style.display = (end < filtered.length) ? 'block' : 'none';
-        }
-
-        function loadMoreFoods() {
-            currentPage++;
-            const all = getAllFoods();
-            let filtered = all;
-            if (currentCategoryFilter !== 'all') filtered = filtered.filter(f => f.category === currentCategoryFilter);
-            const query = document.getElementById('food-search').value.toLowerCase().trim();
-            if (query) filtered = filtered.filter(f => f.name.toLowerCase().includes(query));
-
-            renderFoodsPage(filtered);
         }
 
         function addFoodToLogPrompt(id) {
-            const all = getAllFoods();
-            currentAddFood = all.find(f => f.id === id);
+            const allFoods = loadData();
+            currentAddFood = allFoods.find(f => f.id === id);
             if (!currentAddFood) return;
 
             currentQuantity = 1;
@@ -245,32 +278,20 @@
         function confirmAddToLog() {
             if (!currentAddFood) return;
             hideAddModal();
-            showToast(`${currentQuantity}× ${currentAddFood.name} added to today's log`);
+            showToast(`${currentQuantity}× ${currentAddFood.name} added`);
         }
 
         function showToast(msg) {
             const t = document.createElement('div');
-            t.style.cssText = `position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#10b981;color:white;padding:12px 24px;border-radius:9999px;z-index:9999;font-size:14px;`;
+            t.style.cssText = `position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#10b981;color:white;padding:12px 24px;border-radius:9999px;z-index:9999;`;
             t.textContent = msg;
             document.body.appendChild(t);
             setTimeout(() => t.remove(), 2200);
         }
 
-        function filterCategory(cat) {
-            currentCategoryFilter = cat;
-            document.querySelectorAll('#page-foods button').forEach(b => {
-                b.classList.toggle('bg-emerald-500', b.id === `cat-${cat}`);
-                b.classList.toggle('text-white', b.id === `cat-${cat}`);
-            });
-            filterFoods();
-        }
-
         function initApp() {
-            // Generate a large number of foods (you can increase this)
-            generateMoreFoods(50000);   // Change to 200000 if you want even more (still fast)
-            document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-IN', {weekday:'short', month:'short', day:'numeric'});
             filterFoods();
-            console.log(`%c🚀 NutriCheck loaded with ${getAllFoods().length.toLocaleString()} foods (200k+ capability)`, "color:#10b981; font-weight:bold");
+            console.log("%c✅ All requested Indian foods added successfully", "color:#10b981; font-weight:bold");
         }
 
         window.onload = initApp;
