@@ -3,36 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Loomis Method Assistant</title>
+  <title>Loomis Method - From Image</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       margin: 0;
       background: #1e1e1e;
       color: #eee;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
     }
     header {
       background: #333;
       padding: 15px;
       text-align: center;
-      font-size: 24px;
+      font-size: 26px;
       font-weight: bold;
     }
     .container {
       display: flex;
-      flex: 1;
-      overflow: hidden;
+      height: calc(100vh - 60px);
     }
     .sidebar {
-      width: 280px;
+      width: 300px;
       background: #252525;
       padding: 15px;
       overflow-y: auto;
     }
-    .canvas-area {
+    .main {
       flex: 1;
       display: flex;
       align-items: center;
@@ -42,13 +38,14 @@
     }
     canvas {
       border: 2px solid #555;
-      background: #fff;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      max-width: 100%;
+      max-height: 100%;
+      background: #222;
     }
-    button {
+    button, input[type="file"] {
       width: 100%;
       padding: 10px;
-      margin: 8px 0;
+      margin: 10px 0;
       background: #0066ff;
       color: white;
       border: none;
@@ -56,152 +53,180 @@
       cursor: pointer;
     }
     button:hover { background: #3388ff; }
-    .step { margin: 15px 0; }
-    .step h3 { margin: 5px 0; color: #ffcc00; }
+    .slider {
+      width: 100%;
+    }
+    label { display: block; margin: 8px 0 4px; }
   </style>
 </head>
 <body>
 
-  <header>🧠 Loomis Method Drawing Assistant</header>
+  <header>🧠 Loomis Method on Your Image</header>
   
   <div class="container">
     <!-- Sidebar -->
     <div class="sidebar">
-      <h2>Steps</h2>
-      
-      <div class="step">
-        <h3>1. Draw the Ball (Cranium)</h3>
-        <p>Draw a circle or ball for the skull.</p>
-      </div>
-      
-      <div class="step">
-        <h3>2. Add the Jaw Line</h3>
-        <p>Draw the lower face from the bottom of the ball.</p>
-      </div>
-      
-      <div class="step">
-        <h3>3. Center Line + Horizon</h3>
-        <p>Draw vertical center line and horizontal eye line.</p>
-      </div>
-      
-      <div class="step">
-        <h3>4. Divide the Face</h3>
-        <p>Eye line is at ½ of the head.<br>
-           Nose at ½ between eye line and chin.<br>
-           Mouth at ⅓ between nose and chin.</p>
-      </div>
+      <h3>1. Upload Reference Image</h3>
+      <input type="file" id="imageUpload" accept="image/*">
 
-      <button onclick="clearCanvas()">Clear Canvas</button>
-      <button onclick="toggleGuidelines()">Toggle Guidelines</button>
+      <h3>2. Adjust Loomis Guidelines</h3>
       
-      <h3 style="margin-top:20px;">Controls</h3>
-      <input type="range" id="angle" min="-45" max="45" value="0" style="width:100%" oninput="drawGuidelines()">
-      <label>Head Rotation: <span id="angleVal">0</span>°</label>
+      <label>Head Tilt (Rotation): <span id="rotVal">0</span>°</label>
+      <input type="range" id="rotation" class="slider" min="-60" max="60" value="0">
+
+      <label>Eye Line Height: <span id="eyeVal">50</span>%</label>
+      <input type="range" id="eyeLevel" class="slider" min="30" max="70" value="50">
+
+      <label>Head Size: <span id="sizeVal">100</span>%</label>
+      <input type="range" id="headSize" class="slider" min="50" max="150" value="100">
+
+      <button onclick="clearDrawing()">Clear My Drawing</button>
+      <button onclick="resetGuidelines()">Reset Guidelines</button>
+      <button onclick="toggleGuidelines()">Toggle Guidelines</button>
     </div>
 
-    <!-- Canvas -->
-    <div class="canvas-area">
-      <canvas id="canvas" width="800" height="600"></canvas>
+    <!-- Canvas Area -->
+    <div class="main">
+      <canvas id="canvas" width="900" height="700"></canvas>
     </div>
   </div>
 
   <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
+    let img = new Image();
     let guidelinesOn = true;
-    let rotation = 0;
+    let drawing = false;
 
-    function drawGuidelines() {
+    // Load uploaded image
+    document.getElementById('imageUpload').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        img.onload = function() {
+          draw();
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
+
+      // Draw uploaded image centered
+      if (img.src) {
+        const scale = Math.min(canvas.width / img.width, canvas.height / img.height) * 0.95;
+        const w = img.width * scale;
+        const h = img.height * scale;
+        const x = (canvas.width - w) / 2;
+        const y = (canvas.height - h) / 2;
+        ctx.drawImage(img, x, y, w, h);
+      }
+
+      if (!guidelinesOn) return;
+
+      const rot = parseFloat(document.getElementById('rotation').value);
+      const eyePercent = parseFloat(document.getElementById('eyeLevel').value) / 100;
+      const sizeMult = parseFloat(document.getElementById('headSize').value) / 100;
+
+      document.getElementById('rotVal').textContent = rot;
+      document.getElementById('eyeVal').textContent = Math.round(eyePercent * 100);
+      document.getElementById('sizeVal').textContent = Math.round(sizeMult * 100);
+
       const centerX = canvas.width / 2;
-      const centerY = canvas.height / 2 - 30;
-      const headSize = 220;
-      
-      rotation = parseFloat(document.getElementById('angle').value);
-      document.getElementById('angleVal').textContent = rotation;
+      const centerY = canvas.height / 2;
 
       ctx.save();
       ctx.translate(centerX, centerY);
-      ctx.rotate(rotation * Math.PI / 180);
+      ctx.rotate(rot * Math.PI / 180);
 
-      // 1. Cranium Ball
-      ctx.strokeStyle = '#00ccff';
-      ctx.lineWidth = 3;
+      const radius = 180 * sizeMult;
+
+      // 1. Cranium (Ball)
+      ctx.strokeStyle = '#00ddff';
+      ctx.lineWidth = 4;
       ctx.beginPath();
-      ctx.arc(0, 0, headSize/2, 0, Math.PI * 2);
+      ctx.arc(0, -radius * 0.1, radius, 0, Math.PI * 2);
       ctx.stroke();
 
-      // 2. Jaw / Lower Face
+      // 2. Jaw Line
       ctx.beginPath();
-      ctx.moveTo(-headSize/2 * 0.8, headSize/2 * 0.6);
-      ctx.quadraticCurveTo(0, headSize * 0.95, headSize/2 * 0.8, headSize/2 * 0.6);
+      ctx.moveTo(-radius * 0.75, radius * 0.55);
+      ctx.quadraticCurveTo(0, radius * 1.25, radius * 0.75, radius * 0.55);
       ctx.stroke();
 
-      // Center vertical line
+      // Center Line
       ctx.strokeStyle = '#ff00ff';
       ctx.beginPath();
-      ctx.moveTo(0, -headSize/2);
-      ctx.lineTo(0, headSize * 0.9);
+      ctx.moveTo(0, -radius * 1.1);
+      ctx.lineTo(0, radius * 1.3);
       ctx.stroke();
 
-      // Eye line (horizontal)
+      // Eye Line
       ctx.strokeStyle = '#ffff00';
       ctx.beginPath();
-      ctx.moveTo(-headSize/2, 0);
-      ctx.lineTo(headSize/2, 0);
+      ctx.moveTo(-radius, radius * (eyePercent - 0.1) * 1.8 - radius * 0.1);
+      ctx.lineTo(radius, radius * (eyePercent - 0.1) * 1.8 - radius * 0.1);
       ctx.stroke();
 
-      // Nose bottom
+      // Nose Line
       ctx.beginPath();
-      ctx.moveTo(-headSize/2 * 0.4, headSize * 0.3);
-      ctx.lineTo(headSize/2 * 0.4, headSize * 0.3);
+      ctx.moveTo(-radius * 0.45, radius * (eyePercent + 0.25) * 1.6);
+      ctx.lineTo(radius * 0.45, radius * (eyePercent + 0.25) * 1.6);
       ctx.stroke();
 
-      // Mouth
+      // Mouth Line
       ctx.beginPath();
-      ctx.moveTo(-headSize/2 * 0.35, headSize * 0.55);
-      ctx.lineTo(headSize/2 * 0.35, headSize * 0.55);
+      ctx.moveTo(-radius * 0.4, radius * (eyePercent + 0.55) * 1.4);
+      ctx.lineTo(radius * 0.4, radius * (eyePercent + 0.55) * 1.4);
       ctx.stroke();
 
       ctx.restore();
-
-      // Instructions
-      ctx.fillStyle = "#aaa";
-      ctx.font = "16px Arial";
-      ctx.fillText("Draw on top of these guidelines →", 20, 30);
     }
 
-    function clearCanvas() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      if (guidelinesOn) drawGuidelines();
-    }
+    // Real-time update
+    document.querySelectorAll('input[type="range"]').forEach(slider => {
+      slider.addEventListener('input', draw);
+    });
 
     function toggleGuidelines() {
       guidelinesOn = !guidelinesOn;
-      if (guidelinesOn) drawGuidelines();
-      else clearCanvas();
+      draw();
     }
 
-    // Mouse drawing
-    let drawing = false;
+    function resetGuidelines() {
+      document.getElementById('rotation').value = 0;
+      document.getElementById('eyeLevel').value = 50;
+      document.getElementById('headSize').value = 100;
+      draw();
+    }
+
+    function clearDrawing() {
+      draw(); // redraws image + guidelines only
+    }
+
+    // Mouse drawing on top
     canvas.addEventListener('mousedown', () => drawing = true);
     canvas.addEventListener('mouseup', () => drawing = false);
     canvas.addEventListener('mousemove', (e) => {
       if (!drawing) return;
       const rect = canvas.getBoundingClientRect();
-      ctx.strokeStyle = '#000';
-      ctx.lineWidth = 4;
-      ctx.lineJoin = "round";
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 5;
       ctx.lineCap = "round";
       ctx.beginPath();
-      ctx.moveTo(e.clientX - rect.left - 2, e.clientY - rect.top - 2);
+      ctx.moveTo(e.clientX - rect.left - 3, e.clientY - rect.top - 3);
       ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
       ctx.stroke();
     });
 
-    // Initial draw
-    drawGuidelines();
+    // Initial message
+    ctx.fillStyle = "#888";
+    ctx.font = "24px Arial";
+    ctx.fillText("Upload a face photo to start", canvas.width/2 - 180, canvas.height/2);
   </script>
 </body>
 </html>
